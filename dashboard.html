@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Mountain Top University</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <div class="header-left">
+            <div class="logo-placeholder">MTU</div>
+            <h1 class="header-title">MOUNTAIN TOP UNIVERSITY CLEARANCE</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <span id="userName">User</span>
+                <span id="userRole" class="role-badge">Role</span>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav" id="sidebarNav">
+                <!-- Dynamically populated based on role -->
+            </nav>
+        </aside>
+
+        <main class="main-content" id="mainContent">
+            <!-- Dynamically populated based on role -->
+        </main>
+    </div>
+
+    <script>
+        // Get current user from localStorage
+        function getCurrentUser() {
+            const user = localStorage.getItem('currentUser');
+            if (!user) {
+                window.location.href = 'index.html';
+                return null;
+            }
+            return JSON.parse(user);
+        }
+
+        // Initialize dashboard on load
+        const currentUser = getCurrentUser();
+
+        if (currentUser) {
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
+            renderDashboard(currentUser.role);
+        }
+
+        // Render sidebar and content based on role
+        function renderDashboard(role) {
+            const sidebarNav = document.getElementById('sidebarNav');
+            const mainContent = document.getElementById('mainContent');
+
+            // Clear previous content
+            sidebarNav.innerHTML = '';
+            mainContent.innerHTML = '';
+
+            if (role === 'student') {
+                renderStudentDashboard(sidebarNav, mainContent);
+            } else if (role === 'officer') {
+                renderOfficerDashboard(sidebarNav, mainContent);
+            } else if (role === 'admin') {
+                renderAdminDashboard(sidebarNav, mainContent);
+            } else if (role === 'super_admin') {
+                renderSuperAdminDashboard(sidebarNav, mainContent);
+            }
+        }
+
+        // STUDENT DASHBOARD
+        function renderStudentDashboard(nav, content) {
+            nav.innerHTML = `
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span class="icon">⊞</span>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-page="bursary">
+                    <span class="icon">💳</span>
+                    Bursary
+                </a>
+                <a href="#" class="nav-item" data-page="course">
+                    <span class="icon">📚</span>
+                    Course Registration
+                </a>
+                <a href="#" class="nav-item" data-page="library">
+                    <span class="icon">📖</span>
+                    Library
+                </a>
+                <a href="#" class="nav-item" data-page="chapel">
+                    <span class="icon">⛪</span>
+                    Chapel
+                </a>
+            `;
+
+            content.innerHTML = `
+                <div class="student-banner">
+                    <div class="banner-left">
+                        <h2>${currentUser.name}</h2>
+                        <p class="degree">B.Sc Software Engineering</p>
+                        <p class="dept">Computer Science and Mathematics</p>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper icon-course">
+                            <span>📄</span>
+                        </div>
+                        <div class="card-title">Courses</div>
+                        <div class="card-subtitle">158/158 Completed</div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper icon-refresh">
+                            <span>🔄</span>
+                        </div>
+                        <div class="card-title">Refresh Clearance Status</div>
+                        <div class="card-subtitle">Click to update</div>
+                    </div>
+                </div>
+            `;
+
+            attachNavListeners();
+        }
+
+        // OFFICER DASHBOARD
+        function renderOfficerDashboard(nav, content) {
+            nav.innerHTML = `
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span class="icon">⊞</span>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-page="pending">
+                    <span class="icon">⏳</span>
+                    Pending Requests
+                </a>
+                <a href="#" class="nav-item" data-page="approved">
+                    <span class="icon">✅</span>
+                    Approved Applications
+                </a>
+                <a href="#" class="nav-item" data-page="flagged">
+                    <span class="icon">⚠️</span>
+                    Flagged Applications
+                </a>
+                <a href="#" class="nav-item" data-page="reports">
+                    <span class="icon">📊</span>
+                    Reports
+                </a>
+            `;
+
+            content.innerHTML = `
+                <div class="officer-banner">
+                    <h2>Officer Control Panel</h2>
+                    <p class="subtitle">Welcome, ${currentUser.name}</p>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="dashboard-card clickable" data-action="pending">
+                        <div class="card-icon-wrapper">
+                            <span>⏳</span>
+                        </div>
+                        <div class="card-title">Pending Applications</div>
+                        <div class="card-subtitle">24 waiting for review</div>
+                        <div class="card-action">Click to review</div>
+                    </div>
+
+                    <div class="dashboard-card clickable" data-action="approved">
+                        <div class="card-icon-wrapper">
+                            <span>✅</span>
+                        </div>
+                        <div class="card-title">Approved This Week</div>
+                        <div class="card-subtitle">12 students cleared</div>
+                        <div class="card-action">View details</div>
+                    </div>
+
+                    <div class="dashboard-card clickable" data-action="flagged">
+                        <div class="card-icon-wrapper">
+                            <span>⚠️</span>
+                        </div>
+                        <div class="card-title">Flagged Applications</div>
+                        <div class="card-subtitle">3 require attention</div>
+                        <div class="card-action">Review now</div>
+                    </div>
+                </div>
+
+                <div id="application-details" class="application-details hidden">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            `;
+
+            attachNavListeners();
+            attachCardListeners();
+        }
+
+        // ADMIN DASHBOARD
+        function renderAdminDashboard(nav, content) {
+            nav.innerHTML = `
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span class="icon">⊞</span>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-page="users">
+                    <span class="icon">👥</span>
+                    Manage Users
+                </a>
+                <a href="#" class="nav-item" data-page="departments">
+                    <span class="icon">🏛️</span>
+                    Departments
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <span class="icon">⚙️</span>
+                    System Settings
+                </a>
+            `;
+
+            content.innerHTML = `
+                <div class="admin-banner">
+                    <h2>Admin Control Center</h2>
+                    <p class="subtitle">System Management - ${currentUser.name}</p>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <span>👥</span>
+                        </div>
+                        <div class="card-title">Total Users</div>
+                        <div class="card-subtitle">1,240 registered</div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <span>🏛️</span>
+                        </div>
+                        <div class="card-title">Departments</div>
+                        <div class="card-subtitle">8 departments active</div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <span>📊</span>
+                        </div>
+                        <div class="card-title">System Status</div>
+                        <div class="card-subtitle">All systems operational</div>
+                    </div>
+                </div>
+            `;
+
+            attachNavListeners();
+        }
+
+        // SUPER ADMIN DASHBOARD
+        function renderSuperAdminDashboard(nav, content) {
+            nav.innerHTML = `
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span class="icon">⊞</span>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-page="users">
+                    <span class="icon">👥</span>
+                    User Management
+                </a>
+                <a href="#" class="nav-item" data-page="logs">
+                    <span class="icon">📋</span>
+                    System Logs
+                </a>
+                <a href="#" class="nav-item" data-page="access">
+                    <span class="icon">🔐</span>
+                    Access Control
+                </a>
+                <a href="#" class="nav-item" data-page="codes">
+                    <span class="icon">🔑</span>
+                    Access Codes
+                </a>
+                <a href="#" class="nav-item" data-page="analytics">
+                    <span class="icon">📈</span>
+                    Analytics
+                </a>
+            `;
+
+            content.innerHTML = `
+                <div class="super-admin-banner">
+                    <h2>Super Admin Dashboard</h2>
+                    <p class="subtitle">Full System Control - ${currentUser.name}</p>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <span>📊</span>
+                        </div>
+                        <div class="card-title">System Analytics</div>
+                        <div class="card-subtitle">View comprehensive reports</div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <span>🔐</span>
+                        </div>
+                        <div class="card-title">Security Audit</div>
+                        <div class="card-subtitle">Last audit: 2 hours ago</div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <span>📋</span>
+                        </div>
+                        <div class="card-title">Activity Logs</div>
+                        <div class="card-subtitle">2,450 events today</div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <span>👥</span>
+                        </div>
+                        <div class="card-title">User Accounts</div>
+                        <div class="card-subtitle">1,240 total users</div>
+                    </div>
+                </div>
+            `;
+
+            attachNavListeners();
+        }
+
+        // Attach listeners to navigation items
+        function attachNavListeners() {
+            const navItems = document.querySelectorAll('.nav-item');
+
+            // Remove existing listeners first to avoid duplicates
+            navItems.forEach(item => {
+                item.removeEventListener('click', handleNavClick);
+            });
+
+            // Add new listeners
+            navItems.forEach(item => {
+                item.addEventListener('click', handleNavClick);
+            });
+        }
+
+        // Separate handler function to avoid closure issues
+        function handleNavClick(e) {
+            e.preventDefault();
+            const item = e.currentTarget;
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+
+            const page = item.dataset.page;
+            const role = currentUser?.role;
+
+            // Always render the main dashboard for the current role
+            if (page === 'dashboard') {
+                renderDashboard(role);
+                return;
+            }
+
+            // Render secondary pages depending on current role
+            if (role === 'officer') {
+                renderOfficerPage(page);
+            } else if (role === 'admin') {
+                renderAdminPage(page);
+            } else if (role === 'super_admin') {
+                renderSuperAdminPage(page);
+            } else if (role === 'student') {
+                renderStudentPage(page);
+            }
+        }
+
+        // Attach listeners to dashboard cards
+        function attachCardListeners() {
+            const cards = document.querySelectorAll('.dashboard-card.clickable');
+            cards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const action = card.dataset.action;
+                    
+                    // Activate the corresponding nav item
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    const navItem = document.querySelector(`.nav-item[data-page="${action}"]`);
+                    if (navItem) {
+                        navItem.classList.add('active');
+                    }
+                    
+                    // Render the page
+                    renderOfficerPage(action);
+                });
+            });
+        }
+
+        // Render specific officer pages
+        function renderOfficerPage(page) {
+            const content = document.getElementById('mainContent');
+
+            if (page === 'pending') {
+                renderPendingRequests(content);
+            } else if (page === 'approved') {
+                renderApprovedApplications(content);
+            } else if (page === 'flagged') {
+                renderFlaggedApplications(content);
+            } else if (page === 'reports') {
+                renderReports(content);
+            }
+
+            // Re-attach event listeners after rendering content
+            setTimeout(() => {
+                attachNavListeners();
+            }, 0);
+        }
+
+        // Render admin secondary pages
+        function renderAdminPage(page) {
+            const content = document.getElementById('mainContent');
+
+            if (page === 'users') {
+                renderUserManagement(content);
+            } else if (page === 'departments') {
+                renderDepartmentManagement(content);
+            } else if (page === 'settings') {
+                renderSystemSettings(content);
+            }
+        }
+
+        // Manage Users
+        function renderUserManagement(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Manage Users</h2>
+                    <p class="page-subtitle">Create, edit, or deactivate user accounts</p>
+                    <button class="primary-btn" id="addUserBtn">Add User</button>
+                </div>
+
+                <div class="applications-table">
+                    <div class="table-header">
+                        <div class="col-name">Name</div>
+                        <div class="col-email">Email</div>
+                        <div class="col-role">Role</div>
+                        <div class="col-status">Status</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    ${mockUsers.map(user => `
+                        <div class="table-row">
+                            <div class="col-name">${user.name}</div>
+                            <div class="col-email">${user.email}</div>
+                            <div class="col-role">${user.role}</div>
+                            <div class="col-status">
+                                <span class="status-badge ${user.active ? 'approved' : 'rejected'}">${user.active ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            <div class="col-actions">
+                                <button class="action-btn review" onclick="openUserModal('edit', ${user.id})">Edit</button>
+                                <button class="action-btn reject" onclick="toggleUserStatus(${user.id})">${user.active ? 'Deactivate' : 'Activate'}</button>
+                                <button class="action-btn delete" onclick="deleteUser(${user.id})">Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div id="userModal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="userModalTitle">Add User</h3>
+                            <button class="modal-close" type="button" onclick="closeUserModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-row">
+                                <label for="userNameInput">Name</label>
+                                <input id="userNameInput" type="text" placeholder="Full name" />
+                            </div>
+                            <div class="form-row">
+                                <label for="userEmailInput">Email</label>
+                                <input id="userEmailInput" type="email" placeholder="name@university.edu" />
+                            </div>
+                            <div class="form-row">
+                                <label for="userRoleSelect">Role</label>
+                                <select id="userRoleSelect">
+                                    <option value="student">Student</option>
+                                    <option value="officer">Officer</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="super_admin">Super Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="modal-btn cancel" type="button" onclick="closeUserModal()">Cancel</button>
+                            <button class="modal-btn approve" type="button" id="saveUserBtn">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('addUserBtn').addEventListener('click', () => openUserModal('create'));
+        }
+
+        function openUserModal(mode, userId) {
+            const modal = document.getElementById('userModal');
+            const title = document.getElementById('userModalTitle');
+            const nameInput = document.getElementById('userNameInput');
+            const emailInput = document.getElementById('userEmailInput');
+            const roleSelect = document.getElementById('userRoleSelect');
+            const saveBtn = document.getElementById('saveUserBtn');
+
+            modal.dataset.mode = mode;
+            modal.dataset.userId = userId || '';
+
+            if (mode === 'edit') {
+                const user = mockUsers.find(u => u.id === userId);
+                title.textContent = 'Edit User';
+                nameInput.value = user.name;
+                emailInput.value = user.email;
+                roleSelect.value = user.role;
+            } else {
+                title.textContent = 'Add User';
+                nameInput.value = '';
+                emailInput.value = '';
+                roleSelect.value = 'student';
+            }
+
+            saveBtn.onclick = () => saveUserFromModal();
+            modal.classList.remove('hidden');
+        }
+
+        function closeUserModal() {
+            const modal = document.getElementById('userModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function saveUserFromModal() {
+            const modal = document.getElementById('userModal');
+            const mode = modal.dataset.mode;
+            const userId = parseInt(modal.dataset.userId);
+            const name = document.getElementById('userNameInput').value.trim();
+            const email = document.getElementById('userEmailInput').value.trim();
+            const role = document.getElementById('userRoleSelect').value;
+
+            if (!name || !email) {
+                alert('Please provide both name and email.');
+                return;
+            }
+
+            if (mode === 'edit') {
+                const user = mockUsers.find(u => u.id === userId);
+                if (!user) return;
+                user.name = name;
+                user.email = email;
+                user.role = role;
+            } else {
+                const newId = Math.max(0, ...mockUsers.map(u => u.id)) + 1;
+                mockUsers.push({ id: newId, name, email, role, active: true });
+            }
+
+            closeUserModal();
+            saveUsersToStorage();
+            renderUserManagement(document.getElementById('mainContent'));
+        }
+
+        function toggleUserStatus(userId) {
+            const user = mockUsers.find(u => u.id === userId);
+            if (!user) return;
+            user.active = !user.active;
+            saveUsersToStorage();
+            renderUserManagement(document.getElementById('mainContent'));
+        }
+
+        function deleteUser(userId) {
+            const user = mockUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            if (confirm(`Delete user ${user.name}? This cannot be undone.`)) {
+                const index = mockUsers.findIndex(u => u.id === userId);
+                mockUsers.splice(index, 1);
+                saveUsersToStorage();
+                renderUserManagement(document.getElementById('mainContent'));
+            }
+        }
+
+        // Manage Departments
+        function renderDepartmentManagement(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Departments</h2>
+                    <p class="page-subtitle">Manage department settings and clearance requirements</p>
+                    <button class="primary-btn" id="addDepartmentBtn">Add Department</button>
+                </div>
+
+                <div class="applications-table">
+                    <div class="table-header">
+                        <div class="col-name">Department</div>
+                        <div class="col-email">Head of Department</div>
+                        <div class="col-role">Status</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    ${mockDepartments.map(dept => `
+                        <div class="table-row">
+                            <div class="col-name">${dept.name}</div>
+                            <div class="col-email">${dept.head}</div>
+                            <div class="col-role">
+                                <span class="status-badge ${dept.active ? 'approved' : 'rejected'}">${dept.active ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            <div class="col-actions">
+                                <button class="action-btn review" onclick="openDepartmentModal('edit', ${dept.id})">Edit</button>
+                                <button class="action-btn reject" onclick="toggleDepartmentStatus(${dept.id})">${dept.active ? 'Deactivate' : 'Activate'}</button>
+                                <button class="action-btn delete" onclick="deleteDepartment(${dept.id})">Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div id="departmentModal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="departmentModalTitle">Add Department</h3>
+                            <button class="modal-close" type="button" onclick="closeDepartmentModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-row">
+                                <label for="departmentNameInput">Department Name</label>
+                                <input id="departmentNameInput" type="text" placeholder="e.g., Computer Science" />
+                            </div>
+                            <div class="form-row">
+                                <label for="departmentHeadInput">Head of Department</label>
+                                <input id="departmentHeadInput" type="text" placeholder="e.g., Dr. Ada Lovelace" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="modal-btn cancel" type="button" onclick="closeDepartmentModal()">Cancel</button>
+                            <button class="modal-btn approve" type="button" id="saveDepartmentBtn">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('addDepartmentBtn').addEventListener('click', () => openDepartmentModal('create'));
+        }
+
+        function openDepartmentModal(mode, departmentId) {
+            const modal = document.getElementById('departmentModal');
+            const title = document.getElementById('departmentModalTitle');
+            const nameInput = document.getElementById('departmentNameInput');
+            const headInput = document.getElementById('departmentHeadInput');
+            const saveBtn = document.getElementById('saveDepartmentBtn');
+
+            modal.dataset.mode = mode;
+            modal.dataset.departmentId = departmentId || '';
+
+            if (mode === 'edit') {
+                const dept = mockDepartments.find(d => d.id === departmentId);
+                title.textContent = 'Edit Department';
+                nameInput.value = dept.name;
+                headInput.value = dept.head;
+            } else {
+                title.textContent = 'Add Department';
+                nameInput.value = '';
+                headInput.value = '';
+            }
+
+            saveBtn.onclick = () => saveDepartmentFromModal();
+            modal.classList.remove('hidden');
+        }
+
+        function closeDepartmentModal() {
+            const modal = document.getElementById('departmentModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function saveDepartmentFromModal() {
+            const modal = document.getElementById('departmentModal');
+            const mode = modal.dataset.mode;
+            const departmentId = parseInt(modal.dataset.departmentId);
+            const name = document.getElementById('departmentNameInput').value.trim();
+            const head = document.getElementById('departmentHeadInput').value.trim();
+
+            if (!name || !head) {
+                alert('Please provide both department name and head of department.');
+                return;
+            }
+
+            if (mode === 'edit') {
+                const dept = mockDepartments.find(d => d.id === departmentId);
+                if (!dept) return;
+                dept.name = name;
+                dept.head = head;
+            } else {
+                const newId = Math.max(0, ...mockDepartments.map(d => d.id)) + 1;
+                mockDepartments.push({ id: newId, name, head, active: true });
+            }
+
+            closeDepartmentModal();
+            renderDepartmentManagement(document.getElementById('mainContent'));
+        }
+
+        function toggleDepartmentStatus(departmentId) {
+            const dept = mockDepartments.find(d => d.id === departmentId);
+            if (!dept) return;
+            dept.active = !dept.active;
+            renderDepartmentManagement(document.getElementById('mainContent'));
+        }
+
+        function deleteDepartment(departmentId) {
+            const dept = mockDepartments.find(d => d.id === departmentId);
+            if (!dept) return;
+
+            if (confirm(`Delete department ${dept.name}? This cannot be undone.`)) {
+                const index = mockDepartments.findIndex(d => d.id === departmentId);
+                mockDepartments.splice(index, 1);
+                renderDepartmentManagement(document.getElementById('mainContent'));
+            }
+        }
+
+        // System Settings
+        function renderSystemSettings(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>System Settings</h2>
+                    <p class="page-subtitle">Configure system-wide preferences and policies</p>
+                </div>
+
+                <div class="settings-panel">
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="settingMaintenance" ${mockSettings.maintenanceMode ? 'checked' : ''} />
+                            Maintenance mode (disables login for non-admin users)
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="settingSelfRegister" ${mockSettings.allowSelfRegistration ? 'checked' : ''} />
+                            Allow self-registration
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>
+                            <input type="checkbox" id="settingTwoFactor" ${mockSettings.requireTwoFactor ? 'checked' : ''} />
+                            Require two-factor authentication (2FA)
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label for="settingDeadline">Clearance deadline</label>
+                        <input type="date" id="settingDeadline" value="${mockSettings.clearanceDeadline}" />
+                    </div>
+
+                    <div class="settings-actions">
+                        <button class="primary-btn" onclick="saveSystemSettings()">Save Settings</button>
+                        <button class="secondary-btn" onclick="resetSystemSettings()">Reset Defaults</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function saveSystemSettings() {
+            mockSettings.maintenanceMode = document.getElementById('settingMaintenance').checked;
+            mockSettings.allowSelfRegistration = document.getElementById('settingSelfRegister').checked;
+            mockSettings.requireTwoFactor = document.getElementById('settingTwoFactor').checked;
+            mockSettings.clearanceDeadline = document.getElementById('settingDeadline').value;
+
+            alert('System settings updated successfully.');
+        }
+
+        function resetSystemSettings() {
+            mockSettings.maintenanceMode = false;
+            mockSettings.allowSelfRegistration = true;
+            mockSettings.requireTwoFactor = false;
+            mockSettings.clearanceDeadline = new Date().toISOString().slice(0, 10);
+            renderSystemSettings(document.getElementById('mainContent'));
+        }
+
+        // Render super admin secondary pages
+        function renderSuperAdminPage(page) {
+            const content = document.getElementById('mainContent');
+
+            if (page === 'users') {
+                renderSuperAdminUserManagement(content);
+            } else if (page === 'logs') {
+                renderSuperAdminSystemLogs(content);
+            } else if (page === 'access') {
+                renderSuperAdminAccessControl(content);
+            } else if (page === 'codes') {
+                renderSuperAdminAccessCodes(content);
+            } else if (page === 'analytics') {
+                renderSuperAdminAnalytics(content);
+            }
+        }
+
+        // Super Admin: User Management
+        function renderSuperAdminUserManagement(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>User Management</h2>
+                    <p class="page-subtitle">Manage system-wide user accounts and roles</p>
+                    <button class="primary-btn" id="superAddUserBtn">Add User</button>
+                </div>
+
+                <div class="applications-table">
+                    <div class="table-header">
+                        <div class="col-name">Name</div>
+                        <div class="col-email">Email</div>
+                        <div class="col-role">Role</div>
+                        <div class="col-status">Status</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    ${mockUsers.map(user => `
+                        <div class="table-row">
+                            <div class="col-name">${user.name}</div>
+                            <div class="col-email">${user.email}</div>
+                            <div class="col-role">${user.role}</div>
+                            <div class="col-status">
+                                <span class="status-badge ${user.active ? 'approved' : 'rejected'}">${user.active ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            <div class="col-actions">
+                                <button class="action-btn review" onclick="openSuperUserModal('edit', ${user.id})">Edit</button>
+                                <button class="action-btn reject" onclick="toggleUserStatus(${user.id})">${user.active ? 'Deactivate' : 'Activate'}</button>
+                                <button class="action-btn delete" onclick="deleteUser(${user.id})">Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div id="superUserModal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="superUserModalTitle">Add User</h3>
+                            <button class="modal-close" type="button" onclick="closeSuperUserModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-row">
+                                <label for="superUserNameInput">Name</label>
+                                <input id="superUserNameInput" type="text" placeholder="Full name" />
+                            </div>
+                            <div class="form-row">
+                                <label for="superUserEmailInput">Email</label>
+                                <input id="superUserEmailInput" type="email" placeholder="name@university.edu" />
+                            </div>
+                            <div class="form-row">
+                                <label for="superUserRoleSelect">Role</label>
+                                <select id="superUserRoleSelect">
+                                    <option value="student">Student</option>
+                                    <option value="officer">Officer</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="super_admin">Super Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="modal-btn cancel" type="button" onclick="closeSuperUserModal()">Cancel</button>
+                            <button class="modal-btn approve" type="button" id="saveSuperUserBtn">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('superAddUserBtn').addEventListener('click', () => openSuperUserModal('create'));
+        }
+
+        function openSuperUserModal(mode, userId) {
+            const modal = document.getElementById('superUserModal');
+            const title = document.getElementById('superUserModalTitle');
+            const nameInput = document.getElementById('superUserNameInput');
+            const emailInput = document.getElementById('superUserEmailInput');
+            const roleSelect = document.getElementById('superUserRoleSelect');
+            const saveBtn = document.getElementById('saveSuperUserBtn');
+
+            modal.dataset.mode = mode;
+            modal.dataset.userId = userId || '';
+
+            if (mode === 'edit') {
+                const user = mockUsers.find(u => u.id === userId);
+                title.textContent = 'Edit User';
+                nameInput.value = user.name;
+                emailInput.value = user.email;
+                roleSelect.value = user.role;
+            } else {
+                title.textContent = 'Add User';
+                nameInput.value = '';
+                emailInput.value = '';
+                roleSelect.value = 'student';
+            }
+
+            saveBtn.onclick = () => saveSuperUserFromModal();
+            modal.classList.remove('hidden');
+        }
+
+        function closeSuperUserModal() {
+            const modal = document.getElementById('superUserModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function saveSuperUserFromModal() {
+            const modal = document.getElementById('superUserModal');
+            const mode = modal.dataset.mode;
+            const userId = parseInt(modal.dataset.userId);
+            const name = document.getElementById('superUserNameInput').value.trim();
+            const email = document.getElementById('superUserEmailInput').value.trim();
+            const role = document.getElementById('superUserRoleSelect').value;
+
+            if (!name || !email) {
+                alert('Please provide both name and email.');
+                return;
+            }
+
+            if (mode === 'edit') {
+                const user = mockUsers.find(u => u.id === userId);
+                if (!user) return;
+                user.name = name;
+                user.email = email;
+                user.role = role;
+            } else {
+                const newId = Math.max(0, ...mockUsers.map(u => u.id)) + 1;
+                mockUsers.push({ id: newId, name, email, role, active: true });
+            }
+
+            closeSuperUserModal();
+            saveUsersToStorage();
+            renderSuperAdminUserManagement(document.getElementById('mainContent'));
+        }
+
+        // Super Admin: System Logs
+        function renderSuperAdminSystemLogs(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>System Logs</h2>
+                    <p class="page-subtitle">Review recent system activity</p>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <label for="log-user-filter">User:</label>
+                        <select id="log-user-filter">
+                            <option value="">All Users</option>
+                            ${[...new Set(mockSystemLogs.map(l => l.user))].map(user => `<option value="${user}">${user}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="log-search">Search:</label>
+                        <input id="log-search" type="text" placeholder="Search logs" />
+                    </div>
+                </div>
+
+                <div class="applications-table" id="systemLogTable">
+                    <div class="table-header">
+                        <div class="col-student">Timestamp</div>
+                        <div class="col-dept">User</div>
+                        <div class="col-reason">Action</div>
+                        <div class="col-date">Details</div>
+                    </div>
+                    ${mockSystemLogs.map(log => `
+                        <div class="table-row">
+                            <div class="col-student">${log.timestamp}</div>
+                            <div class="col-dept">${log.user}</div>
+                            <div class="col-reason">${log.action}</div>
+                            <div class="col-date">${log.details}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('log-user-filter').addEventListener('change', applyLogFilters);
+            document.getElementById('log-search').addEventListener('input', applyLogFilters);
+        }
+
+        function applyLogFilters() {
+            const userFilter = document.getElementById('log-user-filter').value;
+            const search = document.getElementById('log-search').value.toLowerCase();
+
+            const rows = Array.from(document.querySelectorAll('#systemLogTable .table-row'));
+
+            rows.forEach(row => {
+                const user = row.querySelector('.col-dept').textContent;
+                const action = row.querySelector('.col-reason').textContent;
+                const details = row.querySelector('.col-date').textContent;
+
+                const matchesUser = !userFilter || user === userFilter;
+                const matchesSearch = !search || `${user} ${action} ${details}`.toLowerCase().includes(search);
+
+                row.style.display = matchesUser && matchesSearch ? 'grid' : 'none';
+            });
+        }
+
+        // Super Admin: Access Control
+        function renderSuperAdminAccessControl(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Access Control</h2>
+                    <p class="page-subtitle">Define which roles can access each feature</p>
+                </div>
+
+                <div class="applications-table">
+                    <div class="table-header">
+                        <div class="col-name">Feature</div>
+                        <div class="col-email">Description</div>
+                        <div class="col-role">Roles</div>
+                    </div>
+                    ${mockAccessRules.map(rule => `
+                        <div class="table-row">
+                            <div class="col-name">${rule.feature}</div>
+                            <div class="col-email">${rule.description}</div>
+                            <div class="col-role">
+                                ${['super_admin', 'admin', 'officer', 'student'].map(role => `
+                                    <label class="access-checkbox">
+                                        <input type="checkbox" data-rule="${rule.id}" data-role="${role}" ${rule.roles.includes(role) ? 'checked' : ''} />
+                                        ${role}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="settings-actions">
+                    <button class="primary-btn" onclick="saveAccessControl()">Save Changes</button>
+                </div>
+            `;
+
+            document.querySelectorAll('.access-checkbox input').forEach(input => {
+                input.addEventListener('change', handleAccessToggle);
+            });
+        }
+
+        function handleAccessToggle(e) {
+            const ruleId = parseInt(e.target.dataset.rule);
+            const role = e.target.dataset.role;
+            const rule = mockAccessRules.find(r => r.id === ruleId);
+
+            if (!rule) return;
+
+            if (e.target.checked) {
+                if (!rule.roles.includes(role)) {
+                    rule.roles.push(role);
+                }
+            } else {
+                rule.roles = rule.roles.filter(r => r !== role);
+            }
+        }
+
+        function saveAccessControl() {
+            alert('Access control rules updated successfully.');
+        }
+
+        // Super Admin: Analytics
+        function renderSuperAdminAnalytics(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Analytics</h2>
+                    <p class="page-subtitle">Quick overview of system usage and performance</p>
+                </div>
+
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-number">${mockAnalytics.users}</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${mockAnalytics.applications}</div>
+                        <div class="stat-label">Total Applications</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${mockAnalytics.activeDepartments}</div>
+                        <div class="stat-label">Active Departments</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${mockAnalytics.monthlyClearanceRate}%</div>
+                        <div class="stat-label">Monthly Clearance Rate</div>
+                    </div>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Daily Active Users</h3>
+                        <div class="report-chart">
+                            <div class="chart-bar" style="height: ${Math.min(mockAnalytics.dailyActiveUsers, 200)}px;"></div>
+                        </div>
+                        <p class="report-note">${mockAnalytics.dailyActiveUsers} active users today</p>
+                    </div>
+                    <div class="report-card">
+                        <h3>Clearance Progress</h3>
+                        <div class="report-chart">
+                            <div class="chart-bar" style="height: ${mockAnalytics.monthlyClearanceRate}px;"></div>
+                        </div>
+                        <p class="report-note">${mockAnalytics.monthlyClearanceRate}% clearance completion</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Super Admin: Access Codes
+        function renderSuperAdminAccessCodes(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Access Codes</h2>
+                    <p class="page-subtitle">Manage registration access codes for different roles</p>
+                    <button class="primary-btn" id="addAccessCodeBtn">Add Access Code</button>
+                </div>
+
+                <div class="applications-table">
+                    <div class="table-header">
+                        <div class="col-name">Code</div>
+                        <div class="col-email">Role</div>
+                        <div class="col-role">Description</div>
+                        <div class="col-status">Status</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    ${mockAccessCodes.map(code => `
+                        <div class="table-row">
+                            <div class="col-name">${code.code}</div>
+                            <div class="col-email">${code.role}</div>
+                            <div class="col-role">${code.description}</div>
+                            <div class="col-status">
+                                <span class="status-badge ${code.active ? 'approved' : 'rejected'}">${code.active ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            <div class="col-actions">
+                                <button class="action-btn review" onclick="openAccessCodeModal('edit', ${code.id})">Edit</button>
+                                <button class="action-btn reject" onclick="toggleAccessCodeStatus(${code.id})">${code.active ? 'Deactivate' : 'Activate'}</button>
+                                <button class="action-btn delete" onclick="deleteAccessCode(${code.id})">Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div id="accessCodeModal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="accessCodeModalTitle">Add Access Code</h3>
+                            <button class="modal-close" type="button" onclick="closeAccessCodeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-row">
+                                <label for="accessCodeInput">Access Code</label>
+                                <input id="accessCodeInput" type="text" placeholder="e.g., ADMIN2026" />
+                            </div>
+                            <div class="form-row">
+                                <label for="accessCodeRoleSelect">Role</label>
+                                <select id="accessCodeRoleSelect">
+                                    <option value="student">Student</option>
+                                    <option value="officer">Officer</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="super_admin">Super Admin</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="accessCodeDescriptionInput">Description</label>
+                                <input id="accessCodeDescriptionInput" type="text" placeholder="e.g., Admin access for Computer Science" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="modal-btn cancel" type="button" onclick="closeAccessCodeModal()">Cancel</button>
+                            <button class="modal-btn approve" type="button" id="saveAccessCodeBtn">Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('addAccessCodeBtn').addEventListener('click', () => openAccessCodeModal('create'));
+        }
+
+        function openAccessCodeModal(mode, codeId) {
+            const modal = document.getElementById('accessCodeModal');
+            const title = document.getElementById('accessCodeModalTitle');
+            const codeInput = document.getElementById('accessCodeInput');
+            const roleSelect = document.getElementById('accessCodeRoleSelect');
+            const descInput = document.getElementById('accessCodeDescriptionInput');
+            const saveBtn = document.getElementById('saveAccessCodeBtn');
+
+            modal.dataset.mode = mode;
+            modal.dataset.codeId = codeId || '';
+
+            if (mode === 'edit') {
+                const code = mockAccessCodes.find(c => c.id === codeId);
+                title.textContent = 'Edit Access Code';
+                codeInput.value = code.code;
+                roleSelect.value = code.role;
+                descInput.value = code.description;
+            } else {
+                title.textContent = 'Add Access Code';
+                codeInput.value = '';
+                roleSelect.value = 'student';
+                descInput.value = '';
+            }
+
+            saveBtn.onclick = () => saveAccessCodeFromModal();
+            modal.classList.remove('hidden');
+        }
+
+        function closeAccessCodeModal() {
+            const modal = document.getElementById('accessCodeModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function saveAccessCodeFromModal() {
+            const modal = document.getElementById('accessCodeModal');
+            const mode = modal.dataset.mode;
+            const codeId = parseInt(modal.dataset.codeId);
+            const code = document.getElementById('accessCodeInput').value.trim().toUpperCase();
+            const role = document.getElementById('accessCodeRoleSelect').value;
+            const description = document.getElementById('accessCodeDescriptionInput').value.trim();
+
+            if (!code || !role || !description) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Check if code already exists (for new codes)
+            if (mode === 'create' && mockAccessCodes.some(c => c.code === code)) {
+                alert('This access code already exists.');
+                return;
+            }
+
+            if (mode === 'edit') {
+                const existingCode = mockAccessCodes.find(c => c.id === codeId);
+                if (!existingCode) return;
+                existingCode.code = code;
+                existingCode.role = role;
+                existingCode.description = description;
+            } else {
+                const newId = Math.max(0, ...mockAccessCodes.map(c => c.id)) + 1;
+                mockAccessCodes.push({ id: newId, code, role, description, active: true });
+            }
+
+            closeAccessCodeModal();
+            saveAccessCodesToStorage();
+            renderSuperAdminAccessCodes(document.getElementById('mainContent'));
+        }
+
+        function toggleAccessCodeStatus(codeId) {
+            const code = mockAccessCodes.find(c => c.id === codeId);
+            if (!code) return;
+            code.active = !code.active;
+            saveAccessCodesToStorage();
+            renderSuperAdminAccessCodes(document.getElementById('mainContent'));
+        }
+
+        function deleteAccessCode(codeId) {
+            const code = mockAccessCodes.find(c => c.id === codeId);
+            if (!code) return;
+
+            if (confirm(`Delete access code "${code.code}"? This cannot be undone.`)) {
+                const index = mockAccessCodes.findIndex(c => c.id === codeId);
+                mockAccessCodes.splice(index, 1);
+                saveAccessCodesToStorage();
+                renderSuperAdminAccessCodes(document.getElementById('mainContent'));
+            }
+        }
+
+        // Render student secondary pages
+        function renderStudentPage(page) {
+            const content = document.getElementById('mainContent');
+
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>${page.charAt(0).toUpperCase() + page.slice(1)}</h2>
+                    <p class="page-subtitle">This section is under development.</p>
+                </div>
+                <div class="placeholder-card">
+                    <p>Student tools will be available here soon.</p>
+                </div>
+            `;
+        }
+
+        // PENDING REQUESTS PAGE
+        function renderPendingRequests(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Pending Requests</h2>
+                    <p class="page-subtitle">Review and process student clearance applications</p>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <label for="department-filter">Department:</label>
+                        <select id="department-filter">
+                            <option value="">All Departments</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="Biology">Biology</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="status-filter">Status:</label>
+                        <select id="status-filter">
+                            <option value="pending">Pending</option>
+                            <option value="under-review">Under Review</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="applications-table">
+                    <div class="table-header">
+                        <div class="col-student">Student</div>
+                        <div class="col-dept">Department</div>
+                        <div class="col-reason">Reason</div>
+                        <div class="col-date">Submitted</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    ${mockApplications.pending.map(app => `
+                        <div class="table-row">
+                            <div class="col-student">
+                                <div class="student-name">${app.name}</div>
+                                <div class="student-matric">${app.matric}</div>
+                            </div>
+                            <div class="col-dept">${app.department}</div>
+                            <div class="col-reason">${app.reason}</div>
+                            <div class="col-date">${app.submitted}</div>
+                            <div class="col-actions">
+                                <button class="action-btn approve" onclick="processApplication(${app.id}, 'approve')">Approve</button>
+                                <button class="action-btn reject" onclick="processApplication(${app.id}, 'reject')">Reject</button>
+                                <button class="action-btn flag" onclick="flagApplication(${app.id})">Flag</button>
+                                <button class="action-btn review" onclick="viewApplicationDetails(${app.id})">Review</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // APPROVED APPLICATIONS PAGE
+        function renderApprovedApplications(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Approved Applications</h2>
+                    <p class="page-subtitle">Recently approved clearance applications</p>
+                </div>
+
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-number">${mockApplications.approved.length}</div>
+                        <div class="stat-label">This Week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">47</div>
+                        <div class="stat-label">This Month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">This Semester</div>
+                    </div>
+                </div>
+
+                <div class="applications-table">
+                    <div class="table-header">
+                        <div class="col-student">Student</div>
+                        <div class="col-dept">Department</div>
+                        <div class="col-reason">Reason</div>
+                        <div class="col-date">Approved</div>
+                        <div class="col-status">Status</div>
+                    </div>
+                    ${mockApplications.approved.map(app => `
+                        <div class="table-row">
+                            <div class="col-student">
+                                <div class="student-name">${app.name}</div>
+                                <div class="student-matric">${app.matric}</div>
+                            </div>
+                            <div class="col-dept">${app.department}</div>
+                            <div class="col-reason">${app.reason}</div>
+                            <div class="col-date">${app.approved}</div>
+                            <div class="col-status">
+                                <span class="status-badge approved">Approved</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // FLAGGED APPLICATIONS PAGE
+        function renderFlaggedApplications(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Flagged Applications</h2>
+                    <p class="page-subtitle">Applications requiring immediate attention</p>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <label for="flag-reason-filter">Flag Reason:</label>
+                        <select id="flag-reason-filter">
+                            <option value="">All Issues</option>
+                            <option value="Outstanding debt">Outstanding Debt</option>
+                            <option value="Incomplete">Incomplete Documentation</option>
+                            <option value="Academic">Academic Issues</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="applications-table">
+                    <div class="table-header">
+                        <div class="col-student">Student</div>
+                        <div class="col-dept">Department</div>
+                        <div class="col-reason">Issue</div>
+                        <div class="col-date">Flagged</div>
+                        <div class="col-actions">Actions</div>
+                    </div>
+                    ${mockApplications.flagged.map(app => `
+                        <div class="table-row">
+                            <div class="col-student">
+                                <div class="student-name">${app.name}</div>
+                                <div class="student-matric">${app.matric}</div>
+                            </div>
+                            <div class="col-dept">${app.department}</div>
+                            <div class="col-reason">${app.flagReason}</div>
+                            <div class="col-date">${app.submitted}</div>
+                            <div class="col-actions">
+                                <button class="action-btn resolve" onclick="processApplication(${app.id}, 'resolve')">Resolve</button>
+                                <button class="action-btn review" onclick="viewApplicationDetails(${app.id})">Details</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        function renderReports(content) {
+            content.innerHTML = `
+                <div class="page-header">
+                    <h2>Reports & Analytics</h2>
+                    <p class="page-subtitle">Clearance application statistics and insights</p>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Weekly Summary</h3>
+                        <div class="report-stats">
+                            <div class="report-stat">
+                                <span class="stat-value">24</span>
+                                <span class="stat-desc">Pending</span>
+                            </div>
+                            <div class="report-stat">
+                                <span class="stat-value">12</span>
+                                <span class="stat-desc">Approved</span>
+                            </div>
+                            <div class="report-stat">
+                                <span class="stat-value">3</span>
+                                <span class="stat-desc">Flagged</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-card">
+                        <h3>Department Breakdown</h3>
+                        <div class="dept-breakdown">
+                            <div class="dept-item">
+                                <span class="dept-name">Computer Science</span>
+                                <span class="dept-count">8 pending</span>
+                            </div>
+                            <div class="dept-item">
+                                <span class="dept-name">Mathematics</span>
+                                <span class="dept-count">5 pending</span>
+                            </div>
+                            <div class="dept-item">
+                                <span class="dept-name">Physics</span>
+                                <span class="dept-count">4 pending</span>
+                            </div>
+                            <div class="dept-item">
+                                <span class="dept-name">Chemistry</span>
+                                <span class="dept-count">3 pending</span>
+                            </div>
+                            <div class="dept-item">
+                                <span class="dept-name">Biology</span>
+                                <span class="dept-count">4 pending</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-card">
+                        <h3>Clearance Types</h3>
+                        <div class="clearance-types">
+                            <div class="type-item">
+                                <span class="type-name">Final Year</span>
+                                <div class="type-bar">
+                                    <div class="type-fill" style="width: 65%"></div>
+                                </div>
+                                <span class="type-percent">65%</span>
+                            </div>
+                            <div class="type-item">
+                                <span class="type-name">Library</span>
+                                <div class="type-bar">
+                                    <div class="type-fill" style="width: 20%"></div>
+                                </div>
+                                <span class="type-percent">20%</span>
+                            </div>
+                            <div class="type-item">
+                                <span class="type-name">Bursary</span>
+                                <div class="type-bar">
+                                    <div class="type-fill" style="width: 10%"></div>
+                                </div>
+                                <span class="type-percent">10%</span>
+                            </div>
+                            <div class="type-item">
+                                <span class="type-name">Chapel</span>
+                                <div class="type-bar">
+                                    <div class="type-fill" style="width: 5%"></div>
+                                </div>
+                                <span class="type-percent">5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-card">
+                        <h3>Processing Time</h3>
+                        <div class="processing-times">
+                            <div class="time-stat">
+                                <span class="time-label">Average</span>
+                                <span class="time-value">2.3 days</span>
+                            </div>
+                            <div class="time-stat">
+                                <span class="time-label">Fastest</span>
+                                <span class="time-value">4 hours</span>
+                            </div>
+                            <div class="time-stat">
+                                <span class="time-label">Slowest</span>
+                                <span class="time-value">7 days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <button class="export-btn" onclick="exportReport('weekly')">Export Weekly Report</button>
+                    <button class="export-btn" onclick="exportReport('monthly')">Export Monthly Report</button>
+                </div>
+            `;
+        }
+
+        // Mock data for applications
+        const mockApplications = {
+            pending: [
+                { id: 1, matric: '12345678901', name: 'OLUWATOBILOBA KUKU', department: 'Computer Science', status: 'pending', submitted: '2026-03-15', reason: 'Final year clearance' },
+                { id: 2, matric: '12345678902', name: 'ADEBAYO JOHNSON', department: 'Mathematics', status: 'pending', submitted: '2026-03-14', reason: 'Library clearance' },
+                { id: 3, matric: '12345678903', name: 'FATIMA ABDULLAHI', department: 'Physics', status: 'pending', submitted: '2026-03-13', reason: 'Bursary clearance' },
+                { id: 4, matric: '12345678904', name: 'CHUKWUEMEKA OKON', department: 'Chemistry', status: 'pending', submitted: '2026-03-12', reason: 'Chapel clearance' }
+            ],
+            approved: [
+                { id: 5, matric: '12345678905', name: 'GRACE NWANKWO', department: 'Biology', status: 'approved', submitted: '2026-03-10', approved: '2026-03-12', reason: 'Complete clearance' },
+                { id: 6, matric: '12345678906', name: 'MICHAEL ADEYEMI', department: 'Engineering', status: 'approved', submitted: '2026-03-09', approved: '2026-03-11', reason: 'Final year clearance' },
+                { id: 7, matric: '12345678907', name: 'ZAINAB MUSA', department: 'Medicine', status: 'approved', submitted: '2026-03-08', approved: '2026-03-10', reason: 'Medical clearance' }
+            ],
+            flagged: [
+                { id: 8, matric: '12345678908', name: 'DAVID OLAWALE', department: 'Law', status: 'flagged', submitted: '2026-03-14', reason: 'Outstanding library fines', flagReason: 'Outstanding debt of ₦5,000' },
+                { id: 9, matric: '12345678909', name: 'AMINA YUSUF', department: 'Economics', status: 'flagged', submitted: '2026-03-13', reason: 'Incomplete documentation', flagReason: 'Missing bursary clearance certificate' },
+                { id: 10, matric: '12345678910', name: 'PETER EMMANUEL', department: 'History', status: 'flagged', submitted: '2026-03-12', reason: 'Academic issues', flagReason: 'Failed course requiring retake' }
+            ]
+        };
+
+        // Mock data for admin pages
+        const mockUsers = loadUsersFromStorage();
+
+        function loadUsersFromStorage() {
+            const storedUsers = localStorage.getItem('mockUsers');
+            if (storedUsers) {
+                return JSON.parse(storedUsers);
+            }
+            // Default users
+            return [
+                { id: 1, name: 'Admin User', email: 'admin@mtu.edu', password: 'admin123', role: 'admin', active: true },
+                { id: 2, name: 'Officer One', email: 'officer@mtu.edu', password: 'officer123', role: 'officer', active: true },
+                { id: 3, name: 'Student Sample', email: 'student@mtu.edu', password: 'student123', role: 'student', active: true }
+            ];
+        }
+
+        function saveUsersToStorage() {
+            localStorage.setItem('mockUsers', JSON.stringify(mockUsers));
+        }
+
+        const mockDepartments = [
+            { id: 1, name: 'Computer Science', head: 'Dr. Ada Lovelace', active: true },
+            { id: 2, name: 'Mathematics', head: 'Dr. Katherine Johnson', active: true },
+            { id: 3, name: 'Biology', head: 'Dr. Rosalind Franklin', active: true }
+        ];
+
+        const mockSettings = {
+            maintenanceMode: false,
+            allowSelfRegistration: true,
+            requireTwoFactor: false,
+            clearanceDeadline: '2026-05-01'
+        };
+
+        // Mock data for super admin features
+        const mockSystemLogs = [
+            { id: 1, timestamp: '2026-03-15 09:22', user: 'Admin User', action: 'User created', details: 'Added officer@mtu.edu as officer' },
+            { id: 2, timestamp: '2026-03-15 10:08', user: 'Admin User', action: 'Settings updated', details: 'Enabled maintenance mode' },
+            { id: 3, timestamp: '2026-03-16 14:33', user: 'Super Admin', action: 'Access rule changed', details: 'Portal access restricted to admin/officer' },
+            { id: 4, timestamp: '2026-03-16 15:12', user: 'Admin User', action: 'User deactivated', details: 'Deactivated student@mtu.edu' }
+        ];
+
+        const mockAccessRules = [
+            { id: 1, feature: 'Dashboard', description: 'Access to main dashboard views', roles: ['super_admin', 'admin', 'officer'] },
+            { id: 2, feature: 'Application Approval', description: 'Approve or reject clearance applications', roles: ['super_admin', 'admin', 'officer'] },
+            { id: 3, feature: 'User Management', description: 'Add/edit users and roles', roles: ['super_admin', 'admin'] },
+            { id: 4, feature: 'System Settings', description: 'Modify global system configuration', roles: ['super_admin'] },
+            { id: 5, feature: 'Reports & Analytics', description: 'View system usage and trends', roles: ['super_admin', 'admin'] }
+        ];
+
+        const mockAnalytics = {
+            users: mockUsers.length,
+            applications: mockApplications.pending.length + mockApplications.approved.length + mockApplications.flagged.length,
+            activeDepartments: mockDepartments.filter(d => d.active).length,
+            monthlyClearanceRate: 78,
+            dailyActiveUsers: 124
+        };
+
+        // Mock data for access codes
+        let mockAccessCodes = loadAccessCodesFromStorage();
+
+        function loadAccessCodesFromStorage() {
+            const stored = localStorage.getItem('mockAccessCodes');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+            // Default codes
+            return [
+                { id: 1, code: 'ADMIN2026', role: 'admin', description: 'Admin access code', active: true },
+                { id: 2, code: 'OFFICER2026', role: 'officer', description: 'Officer access code', active: true },
+                { id: 3, code: 'STUDENT2026', role: 'student', description: 'Student access code', active: true }
+            ];
+        }
+
+        function saveAccessCodesToStorage() {
+            localStorage.setItem('mockAccessCodes', JSON.stringify(mockAccessCodes));
+        }
+
+        // Show application details based on action
+        function showApplicationDetails(action) {
+            const detailsContainer = document.getElementById('application-details');
+            const applications = mockApplications[action];
+
+            if (!applications) return;
+
+            let html = `
+                <div class="details-header">
+                    <h3>${action.charAt(0).toUpperCase() + action.slice(1)} Applications</h3>
+                    <button class="close-btn" onclick="closeDetails()">×</button>
+                </div>
+                <div class="applications-list">
+            `;
+
+            applications.forEach(app => {
+                const statusClass = app.status;
+                const actionButtons = action === 'pending' ?
+                    `<button class="approve-btn" onclick="processApplication(${app.id}, 'approve')">Approve</button>
+                     <button class="reject-btn" onclick="processApplication(${app.id}, 'reject')">Reject</button>` :
+                    action === 'flagged' ?
+                    `<button class="resolve-btn" onclick="processApplication(${app.id}, 'resolve')">Resolve</button>` :
+                    '';
+
+                html += `
+                    <div class="application-item ${statusClass}">
+                        <div class="app-header">
+                            <div class="student-info">
+                                <h4>${app.name}</h4>
+                                <p>Matric: ${app.matric} | Dept: ${app.department}</p>
+                            </div>
+                            <div class="app-status ${statusClass}">${app.status.toUpperCase()}</div>
+                        </div>
+                        <div class="app-details">
+                            <p><strong>Reason:</strong> ${app.reason}</p>
+                            <p><strong>Submitted:</strong> ${app.submitted}</p>
+                            ${app.approved ? `<p><strong>Approved:</strong> ${app.approved}</p>` : ''}
+                            ${app.flagReason ? `<p><strong>Flag Reason:</strong> ${app.flagReason}</p>` : ''}
+                        </div>
+                        <div class="app-actions">
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            detailsContainer.innerHTML = html;
+            detailsContainer.classList.remove('hidden');
+        }
+
+        // Flag an application (moves it from pending to flagged)
+        function flagApplication(id) {
+            const appIndex = mockApplications.pending.findIndex(a => a.id === id);
+            if (appIndex === -1) {
+                alert('Application not found or already processed');
+                return;
+            }
+
+            const reason = prompt('Enter the issue/reason for flagging this application:');
+            if (!reason) {
+                alert('Flagging cancelled. Please provide a valid issue description.');
+                return;
+            }
+
+            const app = mockApplications.pending[appIndex];
+            app.status = 'flagged';
+            app.flagReason = reason;
+
+            // Move from pending to flagged
+            mockApplications.pending.splice(appIndex, 1);
+            mockApplications.flagged.push(app);
+
+            alert(`Application for ${app.name} has been flagged with: ${reason}`);
+
+            const activePage = document.querySelector('.nav-item.active');
+            if (activePage && activePage.dataset.page === 'pending') {
+                renderPendingRequests(document.getElementById('mainContent'));
+            }
+        }
+
+        // Process application (approve/reject/resolve)
+        function processApplication(id, action) {
+            const allApps = [...mockApplications.pending, ...mockApplications.approved, ...mockApplications.flagged];
+            const app = allApps.find(a => a.id === id);
+
+            if (!app) {
+                alert('Application not found');
+                return;
+            }
+
+            const actionText = action.charAt(0).toUpperCase() + action.slice(1);
+            const confirmMsg = `Are you sure you want to ${action} the application for ${app.name}?`;
+
+            if (confirm(confirmMsg)) {
+                alert(`✓ Application ${id} has been ${action}d successfully!\n\nStudent: ${app.name}\nMatric: ${app.matric}\nStatus: ${action.toUpperCase()}`);
+
+                // Refresh the current view
+                const activePage = document.querySelector('.nav-item.active');
+                if (activePage) {
+                    const page = activePage.dataset.page;
+                    if (page === 'pending') {
+                        renderPendingRequests(document.getElementById('mainContent'));
+                    } else if (page === 'approved') {
+                        renderApprovedApplications(document.getElementById('mainContent'));
+                    } else if (page === 'flagged') {
+                        renderFlaggedApplications(document.getElementById('mainContent'));
+                    }
+                }
+            }
+        }
+
+        // View detailed application information
+        function viewApplicationDetails(id) {
+            const allApps = [...mockApplications.pending, ...mockApplications.approved, ...mockApplications.flagged];
+            const app = allApps.find(a => a.id === id);
+
+            if (!app) {
+                alert('Application not found');
+                return;
+            }
+
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'appModal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Application Details</h3>
+                        <button class="modal-close" type="button">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="detail-row">
+                            <strong>Student Name:</strong> ${app.name}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Matric Number:</strong> ${app.matric}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Department:</strong> ${app.department}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Application Type:</strong> ${app.reason}
+                        </div>
+                        <div class="detail-row">
+                            <strong>Submitted Date:</strong> ${app.submitted}
+                        </div>
+                        ${app.approved ? `<div class="detail-row"><strong>Approved Date:</strong> ${app.approved}</div>` : ''}
+                        ${app.flagReason ? `<div class="detail-row"><strong>Flag Reason:</strong> ${app.flagReason}</div>` : ''}
+                        <div class="detail-row">
+                            <strong>Status:</strong> <span class="status-badge ${app.status}">${app.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        ${app.status === 'pending' ?
+                            `<button class="modal-btn approve" type="button" data-id="${app.id}" data-action="approve">Approve</button>
+                             <button class="modal-btn reject" type="button" data-id="${app.id}" data-action="reject">Reject</button>` :
+                            app.status === 'flagged' ?
+                            `<button class="modal-btn resolve" type="button" data-id="${app.id}" data-action="resolve">Resolve Issue</button>` :
+                            ''
+                        }
+                        <button class="modal-btn cancel" type="button">Close</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Attach event listeners to modal buttons
+            const closeBtn = modal.querySelector('.modal-close');
+            const cancelBtn = modal.querySelector('.modal-btn.cancel');
+            const actionBtns = modal.querySelectorAll('.modal-btn[data-action]');
+
+            closeBtn.addEventListener('click', () => closeModal());
+            cancelBtn.addEventListener('click', () => closeModal());
+
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const appId = parseInt(btn.dataset.id);
+                    const action = btn.dataset.action;
+                    processApplication(appId, action);
+                    closeModal();
+                });
+            });
+
+            // Close modal when clicking overlay
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Close modal
+        function closeModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Export report functionality
+        function exportReport(type) {
+            const reportType = type.charAt(0).toUpperCase() + type.slice(1);
+            const timestamp = new Date().toLocaleDateString();
+
+            const reportData = {
+                type: reportType,
+                generatedDate: timestamp,
+                pending: mockApplications.pending.length,
+                approved: mockApplications.approved.length,
+                flagged: mockApplications.flagged.length
+            };
+
+            const csvContent = `
+Report Type: ${reportData.type}
+Generated: ${reportData.generatedDate}
+
+SUMMARY STATISTICS
+==================
+Pending Applications: ${reportData.pending}
+Approved Applications: ${reportData.approved}
+Flagged Applications: ${reportData.flagged}
+Total Applications: ${reportData.pending + reportData.approved + reportData.flagged}
+
+NOTE: This is a demo export. In production, this would generate a proper PDF/Excel file.
+            `.trim();
+
+            alert(`✓ ${reportData.type} report has been generated!\n\nGenerated: ${reportData.generatedDate}\n\nContent Preview:\n${csvContent}`);
+
+            // In a real app, this would trigger a file download
+            // const blob = new Blob([csvContent], { type: 'text/csv' });
+            // const url = window.URL.createObjectURL(blob);
+            // const a = document.createElement('a');
+            // a.href = url;
+            // a.download = `clearance_${type}_report_${timestamp}.csv`;
+            // a.click();
+        }
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+
+</html>
